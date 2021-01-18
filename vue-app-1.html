@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>Commits-example</title>
+	<title>Ma bonne bière</title>
 	<style>
 		#demo {
 			font-family: 'Helvetica', Arial, sans-serif;
@@ -16,7 +16,7 @@
 			line-height: 1.5em;
 			margin-bottom: 20px;
 		}
-		.author, .date {
+		.author, .type {
 			font-weight: bold;
 		}
 	</style>
@@ -24,40 +24,31 @@
 <body>
 	<div id="demo">
 		<!-- <pre>{{commits}}</pre> -->
-		<h1>Latest Vue.js Commits</h1>
+		<h1>Ma bonne bière</h1>
 
 		<pre>{{commits}}</pre>
-
-
-		<template v-for="branch in branches">
-			<input type="radio"
-			:id="branch"
-			:value="branch"
-			name="branch"
-			v-model="currentBranch">
-			<label :for="branch">{{ branch }}</label>
+			
+			
 		</template>
-		<p>vuejs/vue@{{ currentBranch }}</p>
+		<p></p>
 		<ul>
-			<li v-for="record in commits">
-				<a :href="record.html_url" target="_blank" class="commit">{{ record.sha.slice(0, 7) }}</a>
-				- <span class="message">{{ record.commit.message | truncate }}</span><br>
-				by <span class="author"><a :href="record.author.html_url" target="_blank">{{ record.commit.author.name }}</a></span>
-				at <span class="date">{{ record.commit.author.date | formatDate }}</span>
+			<li v-for="biere in bieres">
+                <span class="message">{{biere.name}}</span><br>
+Type de bière : <span class="type">{{ biere.brewery_type }}</span><br>
+Pays d'origine : <span class="message">{{biere.country}}</span><br>
+    Site web : <a v-bind:href=biere.website_url>{{ biere.website_url }}</a>
 			</li>
 		</ul>
 	</div>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	<script>
-		const apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=25&sha='
+		const apiURL = 'https://api.openbrewerydb.org/breweries'
 
 		const demo = new Vue({
 			el: '#demo',
 			data: {
-				branches: ['master', 'dev'],
-				currentBranch: 'master',
-				commits: []
+				bieres: []
 			},
 			created: function () {
 				this.fetchData()
@@ -77,10 +68,10 @@
 			methods: {
 			  	// Version promesse et fonction fléchée
 			    fetchData1: function () {
-				  	axios.get(apiURL + this.currentBranch)
+				  	axios.get(apiURL)
 					  .then((response) => {
 					  	console.log(response.data)
-					    this.commits = response.data 
+					    this.bieres = response.data 
 					  })
 					  .catch((error) => {
 					    console.log(error);
@@ -89,10 +80,10 @@
 				// Version promesse et function standard/historique
 				fetchData2: function () {
 					const self = this
-					axios.get(apiURL + this.currentBranch)
+					axios.get(apiURL)
 						.then(function (response) {
 							console.log(response.data)
-							self.commits = response.data 
+							self.bieres = response.data 
 						})
 						.catch(function (error) {
 							console.log(error);
@@ -101,9 +92,9 @@
 				// Version async/await (à mon sens, à privilégier)
 				fetchData: async function () {
 					try {
-					  	const response = await axios.get(apiURL + this.currentBranch)
+					  	const response = await axios.get(apiURL)
 						console.log(response.data)
-						this.commits = response.data 
+						this.bieres = response.data 
 					} catch (error) {
 						console.log(error);
 					}
