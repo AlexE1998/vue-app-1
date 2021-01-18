@@ -16,46 +16,45 @@
 			line-height: 1.5em;
 			margin-bottom: 20px;
 		}
-		.author, .type {
+		.author, .type, .title {
 			font-weight: bold;
 		}
 	</style>
 </head>
 <body>
 	<div id="demo">
-		<!-- <pre>{{commits}}</pre> -->
-		<h1>Ma bonne bière</h1>
+		<h1>Ma bonne brasserie</h1>
 
-		<pre>{{commits}}</pre>
-			
-			
+		<!-- <pre>{{brasseries}}</pre> -->
 		</template>
-		<p></p>
+		<p><input type="text" v-model="searchString" placeholder="Rentrez le nom de la brasserie" /></p>
 		<ul>
-			<li v-for="biere in bieres">
-                <span class="message">{{biere.name}}</span><br>
-Type de bière : <span class="type">{{ biere.brewery_type }}</span><br>
-Pays d'origine : <span class="message">{{biere.country}}</span><br>
-    Site web : <a v-bind:href=biere.website_url>{{ biere.website_url }}</a>
+			<li v-for="brasserie in filteredBrasseries">
+                <span class="title">{{brasserie.name}}</span><br>
+Type de brasserie : <span class="type">{{ brasserie.brewery_type }}</span><br>
+Pays d'origine : <span class="type">{{brasserie.country}}</span><br>
+Adresse : <span class="type">{{brasserie.street}}</span><br>
+Tel : <span class="type">+1{{brasserie.phone}}</span><br>
+    Site web : <a v-bind:href=brasserie.website_url>{{ brasserie.website_url }}</a>
 			</li>
 		</ul>
 	</div>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 	<script>
-		const apiURL = 'https://api.openbrewerydb.org/breweries'
+        const apiURL = 'https://api.openbrewerydb.org/breweries'
+        
 
 		const demo = new Vue({
 			el: '#demo',
 			data: {
-				bieres: []
+                brasseries: [],
+                searchString: ""
 			},
 			created: function () {
 				this.fetchData()
 			},
-			watch: {
-				currentBranch: 'fetchData'
-			},
+		
 			filters: {
 				truncate: function (v) {
 					const newline = v.indexOf('\n')
@@ -64,14 +63,36 @@ Pays d'origine : <span class="message">{{biere.country}}</span><br>
 				formatDate: function (v) {
 					return v.replace(/T|Z/g, ' ')
 				}
-			},
+            },
+            computed: {
+        // A computed property that holds only those articles that match the searchString.
+        filteredBrasseries: function () {
+            var brasseries_array = this.brasseries,
+                searchString = this.searchString;
+
+            if(!searchString){
+                return brasseries_array;
+            }
+
+            searchString = searchString.trim().toLowerCase();
+
+            brasseries_array = brasseries_array.filter(function(item){
+                if(item.name.toLowerCase().indexOf(searchString) !== -1){
+                    return item;
+                }
+            })
+
+            // Return an array with the filtered data.
+            return brasseries_array;;
+        }
+    },
 			methods: {
 			  	// Version promesse et fonction fléchée
 			    fetchData1: function () {
 				  	axios.get(apiURL)
 					  .then((response) => {
 					  	console.log(response.data)
-					    this.bieres = response.data 
+					    this.brasseries = response.data 
 					  })
 					  .catch((error) => {
 					    console.log(error);
@@ -83,7 +104,7 @@ Pays d'origine : <span class="message">{{biere.country}}</span><br>
 					axios.get(apiURL)
 						.then(function (response) {
 							console.log(response.data)
-							self.bieres = response.data 
+							self.brasseries = response.data 
 						})
 						.catch(function (error) {
 							console.log(error);
@@ -94,7 +115,7 @@ Pays d'origine : <span class="message">{{biere.country}}</span><br>
 					try {
 					  	const response = await axios.get(apiURL)
 						console.log(response.data)
-						this.bieres = response.data 
+						this.brasseries = response.data 
 					} catch (error) {
 						console.log(error);
 					}
